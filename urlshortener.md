@@ -41,6 +41,13 @@ The following diagram illustrates the general flow of how users interact with th
 
 ```mermaid
 graph TD;
+    style UserRequest fill:#0d1117,stroke:#00e6e6,stroke-width:2px;
+    style API fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+    style HashingSystem fill:#0d1117,stroke:#ff073a,stroke-width:2px;
+    style DB fill:#0d1117,stroke:#ffb347,stroke-width:2px;
+    style CacheLayer fill:#0d1117,stroke:#ffd700,stroke-width:2px;
+    style Redirect fill:#0d1117,stroke:#7df9ff,stroke-width:2px;
+
     UserRequest[User Request] -->|POST Long URL| API[API Server];
     API -->|Generate Short URL| HashingSystem[Hashing System];
     HashingSystem -->|Store URL Mapping| DB[Database];
@@ -124,6 +131,11 @@ Two URLs could hash to the same identifier. We can handle this by:
 
 ```mermaid
 graph TD;
+    style LongURL fill:#0d1117,stroke:#ff073a,stroke-width:2px;
+    style Hashing fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+    style Base62Encoding fill:#0d1117,stroke:#ffb347,stroke-width:2px;
+    style ShortURL fill:#0d1117,stroke:#7df9ff,stroke-width:2px;
+
     LongURL[Long URL] --> Hashing[Hashing Function];
     Hashing --> Base62Encoding[Base62 Encoding];
     Base62Encoding --> ShortURL[Short URL];
@@ -142,6 +154,12 @@ To ensure low latency, we can cache frequently accessed URLs.
 
 ```mermaid
 graph TD;
+    style UserRequest fill:#0d1117,stroke:#00e6e6,stroke-width:2px;
+    style CheckCache fill:#0d1117,stroke:#ff073a,stroke-width:2px;
+    style Redirect fill:#0d1117,stroke:#7df9ff,stroke-width:2px;
+    style FetchDB fill:#0d1117,stroke:#ffd700,stroke-width:2px;
+    style UpdateCache fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+
     UserRequest[User Request] --> CheckCache[Check Cache for short_url];
     CheckCache -->|Cache Hit| Redirect[Return Redirect];
     CheckCache -->|Cache Miss| FetchDB[Fetch from DB];
@@ -169,6 +187,12 @@ For high availability and scalability, use a load balancer (e.g., NGINX or AWS E
 
 ```mermaid
 graph TD;
+    style UserRequests fill:#0d1117,stroke:#00e6e6,stroke-width:2px;
+    style LoadBalancer fill:#0d1117,stroke:#ffb347,stroke-width:2px;
+    style Server1 fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+    style Server2 fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+    style Server3 fill:#0d1117,stroke:#39ff14,stroke-width:2px;
+
     UserRequests[User Requests] --> LoadBalancer[Load Balancer];
     LoadBalancer --> Server1[Server 1];
     LoadBalancer --> Server2[Server 2];
