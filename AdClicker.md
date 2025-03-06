@@ -1,5 +1,8 @@
 # Ad Click Aggregator System Design
 
+<img width="1282" alt="Screenshot 2025-03-05 at 4 16 34 PM" src="https://github.com/user-attachments/assets/af55bdef-8db5-4c31-94bb-ddb89bdc9a8c" />
+
+
 ## **Understanding the Problem**
 ### **What is an Ad Click Aggregator?**
 An Ad Click Aggregator is a system that collects and aggregates data on ad clicks to track ad performance for optimization. This design assumes ads are displayed on a website or app.
@@ -145,7 +148,6 @@ An Ad Click Aggregator is a system that collects and aggregates data on ad click
 
 This hybrid approach ensures **real-time analytics, scalability, and accuracy** while keeping latency low for advertiser queries.
 
-<img width="1282" alt="Screenshot 2025-03-05 at 4 16 34 PM" src="https://github.com/user-attachments/assets/af55bdef-8db5-4c31-94bb-ddb89bdc9a8c" />
 
 
 
