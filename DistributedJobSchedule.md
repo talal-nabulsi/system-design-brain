@@ -1,5 +1,8 @@
 # Distributed Job Scheduler System Design Summary
 
+<img width="1273" alt="Screenshot 2025-03-05 at 5 22 34 PM" src="https://github.com/user-attachments/assets/8f6ca8dc-84dc-48d9-81fc-2ca4c274fb21" />
+
+
 ## System Overview
 - **Definition**: System that schedules and executes jobs at specified times or intervals
 - **Scale**: Support for 10K jobs per second
