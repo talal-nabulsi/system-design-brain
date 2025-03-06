@@ -1,5 +1,7 @@
 # Robinhood Stock Trading App System Design Summary
 
+<img width="1279" alt="Screenshot 2025-03-05 at 4 52 32 PM" src="https://github.com/user-attachments/assets/f059d17c-a547-4f82-b69a-815901620aa5" />
+
 ## System Overview
 - **Definition**: Commission-free trading platform for stocks that routes trades through market makers
 - **Role**: Robinhood acts as a broker, not an exchange (interfaces with external exchanges)
