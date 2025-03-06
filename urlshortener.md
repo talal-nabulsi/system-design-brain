@@ -1,95 +1,106 @@
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#F8FAFC',
-    'primaryTextColor': '#334155',
-    'primaryBorderColor': '#64748B',
-    'lineColor': '#64748B',
-    'secondaryColor': '#E2E8F0',
-    'tertiaryColor': '#F1F5F9',
-    'background': '#1E293B'  /* Dark background */
-  }
-}}%%
-graph TD
-    A[Client] -->|request| B[Load Balancer]
-    B -->|forward| C[Server 1]
-    B -->|forward| D[Server 2]
-    
-    classDef default fill:#F8FAFC,stroke:#64748B,stroke-width:2px,color:#334155;
-    classDef highlight fill:#E2E8F0,stroke:#475569,stroke-width:2px,color:#1E293B;
-    
-    class A,B highlight
-```
+# URL Shortener (Bit.ly) System Design Summary
 
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#312E81',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#6366F1',
-    'lineColor': '#818CF8',
-    'secondaryColor': '#4F46E5',
-    'tertiaryColor': '#4338CA',
-    'background': '#F5F3FF'  /* Light purple background */
-  }
-}}%%
-sequenceDiagram
-    participant U as User
-    participant S as System
-    participant D as Database
-    
-    U->>+S: Request
-    S->>+D: Query
-    D-->>-S: Response
-    S-->>-U: Result
-```
+<img width="1247" alt="Screenshot 2025-03-05 at 4 39 40 PM" src="https://github.com/user-attachments/assets/a0fe5e05-8963-417d-b42f-0998060a238c" />
 
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#ffffff',
-    'primaryTextColor': '#0F172A',
-    'primaryBorderColor': '#64748B',
-    'lineColor': '#64748B',
-    'secondaryColor': '#F1F5F9',
-    'tertiaryColor': '#E2E8F0',
-    'background': '#F0FDF4'  /* Light green background */
-  }
-}}%%
-erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ LINE-ITEM : contains
-```
 
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#ffffff',
-    'primaryTextColor': '#1E293B',
-    'primaryBorderColor': '#64748B',
-    'lineColor': '#64748B',
-    'secondaryColor': '#FEF2F2',
-    'tertiaryColor': '#FEE2E2',
-    'background': '#0F172A',  /* Dark blue background */
-    'textColor': '#F8FAFC',
-    'mainBkg': '#1E293B',
-    'nodeBorder': '#475569',
-    'clusterBkg': '#1E293B',
-    'clusterBorder': '#475569',
-    'edgeLabelBackground': '#1E293B'
+## System Overview
+- **Definition**: Service that converts long URLs into shorter, manageable links
+- **Read-to-Write Ratio**: Heavily skewed toward reads (approximately 1000:1)
+
+## Functional Requirements
+- Create shortened URLs from long URLs
+- Optional custom aliases for shortened URLs
+- Optional expiration dates for shortened URLs
+- Access original URL by using the shortened version
+- **Out of Scope**: User authentication, click analytics
+
+## Non-Functional Requirements
+- Uniqueness of short codes (no collisions)
+- Low latency redirection (<100ms)
+- High reliability (99.99% availability)
+- Scalability to 1B shortened URLs and 100M daily active users
+- **Out of Scope**: Real-time analytics consistency, advanced security
+
+## Core Entities
+- Original URL: The long URL being shortened
+- Short URL: The shortened version with unique code
+- User: The creator of the shortened URL
+
+## API Design
+- **Create Short URL**:
+  ```
+  POST /urls
+  {
+    "long_url": "https://www.example.com/some/very/long/url",
+    "custom_alias": "optional_custom_alias", 
+    "expiration_date": "optional_expiration_date"
   }
-}}%%
-graph TD
-    A[Frontend] -->|API| B[Backend]
-    B -->|Query| C[Database]
-    B -->|Cache| D[Redis]
-    
-    classDef default fill:#1E293B,stroke:#475569,stroke-width:2px,color:#F8FAFC;
-    classDef highlight fill:#312E81,stroke:#6366F1,stroke-width:2px,color:#F8FAFC;
-    
-    class A,D highlight
-```
+  ```
+  Response: `{ "short_url": "http://short.ly/abc123" }`
+
+- **Access Original URL**:
+  ```
+  GET /{short_code}
+  ```
+  Response: HTTP 302 Redirect to original URL
+
+## High-Level Design Components
+- **Client**: Web/mobile app for user interaction
+- **Primary Server**: Handles URL validation, short code generation, and redirection
+- **Database**: Stores mappings between short codes and long URLs
+- **Cache**: Improves read performance for frequent redirects
+- **CDN/Edge Computing**: Optional for further latency reduction
+
+## Short Code Generation Approach
+- **Counter-Based with Base62 Encoding**:
+  - Use an incremental counter (stored in Redis)
+  - Encode counter value with base62 (a-z, A-Z, 0-9)
+  - Guarantees uniqueness with no collision checking
+  - 6 characters can support 1B URLs (scales to 7 chars for trillions)
+
+## Performance Optimization
+- **Database Indexing**:
+  - Create indexes on short_code column for fast lookups
+  - Removes need for full table scans
+
+- **Caching Strategy**:
+  - Cache frequently accessed mappings
+  - Implement LRU (Least Recently Used) eviction policy
+  - Write-through cache pattern for consistency
+
+- **CDN & Edge Computing** (optional):
+  - Use CDN with global Points of Presence
+  - Deploy redirect logic at edge locations
+  - Reduces latency by handling redirects closer to users
+
+## Scaling Approach
+- **Data Sizing**: ~500GB for 1B URLs (500 bytes per record)
+- **Database Options**: PostgreSQL, MySQL, DynamoDB (most options work)
+- **High Availability**:
+  - Database replication for redundancy
+  - Periodic database backups
+
+- **Microservice Architecture**:
+  - Separate read service (handles redirects)
+  - Separate write service (creates short URLs)
+  - Scale each service independently based on demand
+
+- **Counter Scaling**:
+  - Centralized Redis instance for counter
+  - Counter batching (each service requests 1000 values at once)
+  - Redis replication for counter high availability
+
+## Redirection Process
+- Prefer 302 (Temporary Redirect) over 301 (Permanent Redirect)
+- Advantages of 302:
+  - Greater control over redirection
+  - Prevents browser caching
+  - Enables click tracking if needed
+  - Allows updating/expiring links
+
+## Final Architecture Highlights
+- Split read/write paths for optimal scaling
+- Horizontally scaled services behind load balancers
+- Redis for distributed counter with batching
+- Caching layer for frequent URL lookups
+- Optional CDN integration for edge redirection
