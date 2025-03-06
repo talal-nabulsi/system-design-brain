@@ -1,5 +1,9 @@
 # **Instagram System Design Breakdown**
 
+
+<img width="1296" alt="Screenshot 2025-03-05 at 4 26 46 PM" src="https://github.com/user-attachments/assets/f06caf90-c825-46e9-aade-07eaf77db377" />
+
+
 ## **Understanding the Problem**
 ### 📸 **What is Instagram?**
 Instagram is a social media platform primarily focused on visual content, allowing users to share photos and videos with their followers.
